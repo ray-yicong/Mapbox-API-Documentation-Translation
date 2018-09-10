@@ -2,20 +2,20 @@
 
 The Mapbox Static API returns static maps and raster tiles from styles in the [Mapbox Style Specification](https://mapbox.com/mapbox-gl-style-spec).
 
-- **Static maps** are standalone images that can be displayed on web and mobile devices without the aid of a mapping library or API. They look like an embedded map, but do not have interactivity or controls. The returned static map will be a PNG file.
-- **Raster tiles** can be used in traditional web mapping libraries like [Mapbox.js](https://mapbox.com/mapbox.js), [Leaflet](https://mapbox.com/help/define-leaflet), OpenLayers, and others. The returned raster tile will be a JPEG, and will be 512px by 512px by default.
+- **静态地图** 是不需要借助映射库或API就可以在网页和移动设备上显示的独立影像。are standalone images that can be displayed on web and mobile devices without the aid of a mapping library or API.他们就像是嵌入式地图，但不能交互和控制，反馈的静态地图会保存为PNG文件。 They look like an embedded map, but do not have interactivity or controls. The returned static map will be a PNG file.
+- **栅格切片** 可以作为传统网页的地图数据库，例如can be used in traditional web mapping libraries like [Mapbox.js](https://mapbox.com/mapbox.js), [Leaflet](https://mapbox.com/help/define-leaflet), 矢量图层等。OpenLayers, and others. 反馈的栅格切片会保存为JPGE文件，默认尺寸为512×512像素。eturned raster tile will be a JPEG, and will be 512px by 512px by default.
 
 Swift and Objective-C support for the Static API is provided by the [MapboxStatic.swift](https://github.com/mapbox/MapboxStatic.swift/) library.
 
-To build a Static API request by zooming and panning around an interactive map, use the [Static API playground](https://www.mapbox.com/help/static-api-playground).
+利用 [Static API playground](https://www.mapbox.com/help/static-api-playground来制作一个放缩和平移功能的交互地图。
 
-**Restrictions and limits**
+**限制**
 
-- Static maps: The default rate limit is 600 requests per minute.
-- Raster tiles: The default rate limit is 2,000 requests per minute.
-- Exceeding these limits will result in an `HTTP 429` response. For information on rate limit headers, see [Rate limits](#rate-limits).
+- 静态地图: 默认速率是每分钟600次请求。 default rate limit is 600 requests per minute.
+- 格切片: 默认速率是每分钟2000次请求。default rate limit is 2,000 requests per minute.
+- 超过这些速率限制会导致`HTTP 429`错误。Exceeding these limits will result in an `HTTP 429` response. 有关速率限制标头的信息可以在查看For information on rate limit headers, see [Rate limits](#rate-limits).
 
-If you require a higher rate limit, [contact us](https://www.mapbox.com/contact/).
+如果你需要更高的服务速率，请联系我们If you require a higher rate limit, [contact us](https://www.mapbox.com/contact/).
 
 ```python
 from mapbox import StaticStyle
@@ -26,13 +26,13 @@ const mbxStatic = require('@mapbox/mapbox-sdk/services/static');
 const staticClient = mbxStatic({ accessToken: '{your_access_token}' });
 ```
 
-### Retrieve a static map from a style
+### 从一种样式恢复到静态地图Retrieve a static map from a style
 
 ```endpoint
 GET /styles/v1/{username}/{style_id}/static/{overlay}/{lon},{lat},{zoom},{bearing},{pitch}{auto}/{width}x{height}{@2x} styles:tiles
 ```
 
-Returns a static map from a specified style as a PNG. Use of the static maps endpoint is rate-limited by access token. By default, the rate limit is set to 600 requests per minute.
+从一种特定的样式恢复到作为PNG的静态地图。Returns a static map from a specified style as a PNG. Use of the static maps endpoint is rate-limited by access token. By default, the rate limit is set to 600 requests per minute.
 
 The position of the map is represented by either the word `auto` or by five numbers: longitude, latitude, zoom, bearing, and pitch. The last two numbers, bearing and pitch, are optional. If you only specify bearing and not pitch, pitch will default to `0`. If you specify neither, they will both default to `0`. If you specify `"auto"`, you should not provide any of these numbers.
 
