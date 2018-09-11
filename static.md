@@ -1,21 +1,20 @@
-## Static
+## 静态地图相关设置
 
-The Mapbox Static API returns static maps and raster tiles from styles in the [Mapbox Style Specification](https://mapbox.com/mapbox-gl-style-spec).
+Mapbox静态API从[Mapbox Style Specification](https://mapbox.com/mapbox-gl-style-spec)中返回至静态地图和栅格切片.
 
-- **Static maps** are standalone images that can be displayed on web and mobile devices without the aid of a mapping library or API. They look like an embedded map, but do not have interactivity or controls. The returned static map will be a PNG file.
-- **Raster tiles** can be used in traditional web mapping libraries like [Mapbox.js](https://mapbox.com/mapbox.js), [Leaflet](https://mapbox.com/help/define-leaflet), OpenLayers, and others. The returned raster tile will be a JPEG, and will be 512px by 512px by default.
+- **静态地图** 是不需要借助映射库或API就可以在网页和移动设备上显示的独立影像。他们就像是嵌入式地图，但不能交互和控制，反馈的静态地图会保存为PNG文件。
+- **栅格切片** 可以作为传统网页的地图数据库，例如 [Mapbox.js](https://mapbox.com/mapbox.js), [Leaflet](https://mapbox.com/help/define-leaflet), 矢量图层等。反馈的栅格切片会保存为JPGE文件，默认尺寸为512×512像素。
+对静态API的Swift和Objective-C支持由[MapboxStatic.swift](https://github.com/mapbox/MapboxStatic.swift/) 数据库提供。
 
-Swift and Objective-C support for the Static API is provided by the [MapboxStatic.swift](https://github.com/mapbox/MapboxStatic.swift/) library.
+利用 [Static API playground](https://www.mapbox.com/help/static-api-playground) 制作一个放缩和平移功能的交互地图。
 
-To build a Static API request by zooming and panning around an interactive map, use the [Static API playground](https://www.mapbox.com/help/static-api-playground).
+**限制**
 
-**Restrictions and limits**
+- 静态地图: 默认速率是每分钟600次请求。
+- 格切片: 默认速率是每分钟2000次请求。
+- 超过这些速率限制会导致`HTTP 429`错误。有关速率限制标头的信息可以在 [速率限制](#rate-limits)查看。
 
-- Static maps: The default rate limit is 600 requests per minute.
-- Raster tiles: The default rate limit is 2,000 requests per minute.
-- Exceeding these limits will result in an `HTTP 429` response. For information on rate limit headers, see [Rate limits](#rate-limits).
-
-If you require a higher rate limit, [contact us](https://www.mapbox.com/contact/).
+如果你需要更高的服务速率，请[联系我们](https://www.mapbox.com/contact/)。
 
 ```python
 from mapbox import StaticStyle
@@ -26,40 +25,38 @@ const mbxStatic = require('@mapbox/mapbox-sdk/services/static');
 const staticClient = mbxStatic({ accessToken: '{your_access_token}' });
 ```
 
-### Retrieve a static map from a style
+### 从一种样式恢复到静态地图
 
 ```endpoint
 GET /styles/v1/{username}/{style_id}/static/{overlay}/{lon},{lat},{zoom},{bearing},{pitch}{auto}/{width}x{height}{@2x} styles:tiles
 ```
 
-Returns a static map from a specified style as a PNG. Use of the static maps endpoint is rate-limited by access token. By default, the rate limit is set to 600 requests per minute.
+从一种特定的样式恢复到作为PNG的静态地图。静态地图端点的使用速率受到访问令牌的限制。默认下速率限制为每分钟600次。
 
-The position of the map is represented by either the word `auto` or by five numbers: longitude, latitude, zoom, bearing, and pitch. The last two numbers, bearing and pitch, are optional. If you only specify bearing and not pitch, pitch will default to `0`. If you specify neither, they will both default to `0`. If you specify `"auto"`, you should not provide any of these numbers.
+发布地图的位置既可以`auto`选择也可以通过：经度，纬度，放缩程度，视角方向和倾斜角度，这五个参数控制。后两个参数，视角方向和倾斜程度是可选择的。如果您只需要特定的视角方向而不需要调整倾斜程度，倾斜视角会默认为`0`。如果您不需要调整任何参数，它们都会默认为`0`。如果你想`auto`选择，就不需要提供任何这些参数。
 
-Parameter | Description
+参数 | 参数描述
 ---------- | ------------
-`username` | The username of the account to which the style belongs.
-`style_id` | The ID of the style from which to create a static map.
-`overlay` | One or more comma-separated features that can be applied on top of the map at request time. The order of features in an overlay dictates their Z-order on the page. The last item in the list will have the highest Z-order (will overlap the other features in the list), and the first item in the list will have the lowest (will underlap the other features). Format can be a mix of `geojson`, `marker`, or `path`. For more details on each option, see the [Overlay options section](#overlay-options).
-`lon` | Longitude for the center point of the static map; a number between `-180` and `180`.
-`lat` | Latitude for the center point of the static map; a number between `-90` and `90`.
-`zoom` | Zoom level; a number between `0` and `20`. Fractional zoom levels will be rounded to two decimal places.
-`bearing`<br /> (optional) | Bearing rotates the map around its center. A number between `0` and `360`, interpreted as decimal degrees. 90 rotates the map 90° clockwise, while 180 flips the map. Defaults to `0`.
-`pitch`<br /> (optional) | Pitch tilts the map, producing a perspective effect. A number between `0` and `60`, measured in degrees. Defaults to `0` (looking straight down at the map).
-`auto` | If `auto` is added, the viewport will fit the bounds of the overlay. If used, `auto` replaces `lon`, `lat`, `zoom`, `bearing`, and `pitch`.
-`width` | Width of the image; a number between `1` and `1280` pixels.
-`height` | Height of the image; a number between `1` and `1280` pixels.
-`@2x`<br /> (optional) | Render the static map at a `@2x` scale factor for high-density displays.
+`username` | 是这个样式所属人的账号名称。
+`style_id` | 是创建这个静态地图样式所属的ID。
+`overlay` | 一个或多个逗号分隔的要素，可以在请求时应用于地图的顶部。覆盖层中的要素顺序决定了它们在页面上的z方向上的顺序，位于列表中的最后一项会在最上层（覆盖在列表中其他要素上）并且位于列表中的第一项会在最下面（处于列表中所有要素的最下层）。最终格式可以是`geojson`, `marker`, 和 `path`的结合体。对于每个选项的更多细节，可以在 [Overlay options section](#overlay-options)中查看。
+`lon` | 为静态地图的中心点的经度;位于数字 `-180` 和 `180`之间。
+`lat` | 为静态地图的中心点的纬度;位于数字 `-90` 和 `90`之间。
+`zoom` | 放缩程度; 位于数字 `0` 和 `20`之间。缩放级别的参数将四舍五入到小数点后两位。
+`bearing`<br /> (可选) | 方位视角以其中心为中心旋转地图。位于数字 `0` 和 `360`之间，以十进制计数。可以顺时针或者逆时针旋转地图90°，但180°翻转地图，会默认旋转度数为`0`。
+`auto` | 如果添加`auto`选择, 视角会结合覆盖层的边界来调整。如果应用`auto`，它会取代其他五个参数`lon`, `lat`, `zoom`, `bearing`, `pitch`
+`width` | 图像宽度; 位于数值 `1` 和 `1280` 像素之间。
+`height` | 像高度; 位于数值 `1` 和d `1280` 像素之间。
+`@2x`<br /> (可选) | 在`@2x`比例因子下呈现静态地图为高密度显示。
 
-You can further refine the results from this endpoint with the following optional parameters:
+您可以使用以下可选参数进一步细化这个端点的结果。
 
-Query parameter | Description
+查询参数 | 参数描述
 ---------- | ------------
-`attribution`<br /> (optional) | A `boolean` value controlling whether there is attribution on the image. Defaults to `true`. **Note:** If `attribution=false`, the watermarked attribution is removed from the image. You still have a legal responsibility to attribute maps that use OpenStreetMap data, which includes most maps from Mapbox. If you specify `attribution=false`, you are legally required to [include proper attribution elsewhere on the webpage or document](https://www.mapbox.com/help/attribution/#static--print).
-`logo`<br /> (optional) | A `boolean` value controlling whether there is a Mapbox logo on the image. Defaults to `true`.
-`before_layer` (optional) | A `string` value for controlling where the `overlay` is inserted in the style. All overlays will be inserted before the specified layer.
-
-**Overlay options**<a id="overlay-options"></a>
+`归属`<br /> (可选参数) | 用一个“布尔值”，控制图像上的图像归属。默认为`true`。 **注意:** If `属性=false`, 会从图像中删除水印属性，您仍然有法律责任为使用OpenStreetMap数据的地图提供所属来源，其中包括大部分mapbox的地图。如果需要特定`属性=false`，法律要求你在 [网页或文件的其他地方注明正确的出处](https://www.mapbox.com/help/attribution/#static--print)。
+`logo`<br /> (可选) | 一个“布尔”值，控制图像上是否有Mapbox徽标。默认为`true`。
+`before_layer` (可选) | 一个`字符串`值，用于控制在样式中插入`overlay`的位置。所有覆盖层将插入到指定的层之前。
+**叠加选项**<a id="overlay-options"></a>
 
 _GeoJSON_
 
@@ -67,52 +64,52 @@ _GeoJSON_
 geojson({geojson})
 ```
 
-Argument | Description
+内容提要 | 描述
 --- | ---
-`geojson` | The `{geojson}` argument must be a valid GeoJSON object. [simplestyle-spec](https://github.com/mapbox/simplestyle-spec) styles for GeoJSON features will be respected and rendered.
+`geojson` | `{geojson}` 文件必须是一个完整可调用的GeoJSON文件 [simplestyle-spec](https://github.com/mapbox/simplestyle-spec) GeoJSON特性的样式将得到和渲染。styles for GeoJSON features will be respected and rendered.
 
-_Marker_
+_标记_
 
 ```
 {name}-{label}+{color}({lon},{lat})
 ```
 
-Argument | Description
+内容提要 | 描述
 --- | ---
-`name` | Marker shape and size. Options are `pin-s` and `pin-l`.
-`label`<br /> (optional) | Marker symbol. Options are an alphanumeric label `a` through `z`, `0` through `99`, or a valid [Maki](https://www.mapbox.com/maki/) icon. If a letter is requested, it will be rendered in uppercase only.
-`color`<br /> (optional) | A 3- or 6-digit hexadecimal color code.
-`lon, lat` | The location at which to center the marker. When using an asymmetric marker, make sure that the tip of the pin is at the center of the image.
+`name` | 标记的形状与尺寸。有`pin-s` 和 `pin-l`选项。
+`label`<br /> (可选) | 标记符号。 选项是一个字母数字标签，从 `a` 到 `z`，从 `0` 到 `99`, 或者是一个能调用的 [Maki](https://www.mapbox.com/maki/) 符号。如果被请求的是一个字母，只限用大写字母。
+`color`<br /> (可选) | 一种3或6位十六进制颜色码。
+`lon, lat` | 标记中心的位置。当使用非对称标记时，请确保指针位于图像的中心。
 
-_Custom marker_
+_自定义标记_
 
 ```
 url-{url}({lon},{lat})
 ```
 
-Argument | Description
+内容提要 | 描述
 --- | ---
-`url` | A percent-encoded URL for the image. Type can be `PNG` or `JPG`.
-`lon, lat` | The location at which to center the marker. When creating an asymmetric marker like a pin, make sure that the tip of the pin is at the center of the image.
+`url` | 图像的百分比编码URL.可以是 `PNG` 或 `JPG`格式。
+`lon, lat` | 标记中心的位置。当创建一个非对称标记时，比如一个指针，确保指针的尖端位于图像的中心。
 
-Custom markers are cached according to the `Expires` and `Cache-Control` headers. Make sure that at least one of these headers is set to a proper value to prevent repeated requests for the custom marker image.
+自定义标记是根据`Expires`和`Cache-Control`标题缓存的。确保至少将这些标头中的一个设置为适当的值，以防止对定制标记图像的重复请求。
 
-_Path_
+_路径_
 
 ```
 path-{strokeWidth}+{strokeColor}-{strokeOpacity}+{fillColor}-{fillOpacity}({polyline})
 ```
 
-[Encoded polylines](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) with a precision of 5 decimal places can be used with the Static API via the `path` parameter.
+[编码的线段](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) 精度为5位小数的静态API可以通过`path`参数使用。
 
-Argument | Description
+内容提要 | 描述
 --- | ---
-`strokeWidth`<br /> (optional) | A positive number for the line stroke width
-`strokeColor`<br /> (optional) | A 3- or 6-digit hexadecimal color code for the line stroke
-`strokeOpacity`<br /> (optional) | A number between `0` (transparent) and `1` (opaque) for line stroke opacity
-`fillColor`<br /> (optional) | A 3- or 6-digit hexadecimal color code for the fill
-`fillOpacity`<br /> (optional) | A number between `0` (transparent) and `1` (opaque) for fill opacity
-`polyline` | A valid encoded polyline encoded as a URI component
+`线条宽度`<br /> (可选) | 线行程宽度的数额大小。
+`线条颜色`<br /> (可选) | 一行描边的3位或6位十六进制颜色代码。
+`线条透明度`<br /> (可选) | 在`0`(透明)和`1`(不透明)之间的数字，用于设置线条的透明度。
+`填充颜色`<br /> (可选) | 用3或6位十六进制颜色码填充。
+`透明度填充`<br /> (可选) | 用`0`(透明)和`1`(不透明)之间的的数值来设置填充透明度。
+`线段` | 作为URI组件编码的有效编码线段
 
 #### Example request
 
